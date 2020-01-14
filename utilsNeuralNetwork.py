@@ -58,3 +58,36 @@ def dense_layer(input_, reduccion, agrandamiento):
     dl_1 = leaky_relu(tf.keras.layers.concatenate([dl_1, dl_2]))
 
     return dl_1
+
+
+    def expit_tensor(x):
+    return 1. / (1. + tf.exp(-tf.clip_by_value(x,-10,10)))
+
+def calc_iou(boxes1, boxes2):
+
+    boxes1 = tf.stack([boxes1[:, :, :, :, 0] - boxes1[:, :, :, :, 2] / 2.0,
+                       boxes1[:, :, :, :, 1] - boxes1[:, :, :, :, 3] / 2.0,
+                       boxes1[:, :, :, :, 0] + boxes1[:, :, :, :, 2] / 2.0,
+                       boxes1[:, :, :, :, 1] + boxes1[:, :, :, :, 3] / 2.0])
+    boxes1 = tf.transpose(boxes1, [1, 2, 3, 4, 0])
+
+    boxes2 = tf.stack([boxes2[:, :, :, :, 0] - boxes2[:, :, :, :, 2] / 2.0,
+                       boxes2[:, :, :, :, 1] - boxes2[:, :, :, :, 3] / 2.0,
+                       boxes2[:, :, :, :, 0] + boxes2[:, :, :, :, 2] / 2.0,
+                       boxes2[:, :, :, :, 1] + boxes2[:, :, :, :, 3] / 2.0])
+    boxes2 = tf.transpose(boxes2, [1, 2, 3, 4, 0])
+
+    lu = tf.maximum(boxes1[:, :, :, :, :2], boxes2[:, :, :, :, :2])
+    rd = tf.minimum(boxes1[:, :, :, :, 2:], boxes2[:, :, :, :, 2:])
+
+    intersection = tf.maximum(0.0, rd - lu)
+    inter_square = intersection[:, :, :, :, 0] * intersection[:, :, :, :, 1]
+
+    square1 = (boxes1[:, :, :, :, 2] - boxes1[:, :, :, :, 0]) * \
+              (boxes1[:, :, :, :, 3] - boxes1[:, :, :, :, 1])
+    square2 = (boxes2[:, :, :, :, 2] - boxes2[:, :, :, :, 0]) * \
+              (boxes2[:, :, :, :, 3] - boxes2[:, :, :, :, 1])
+
+    union_square = tf.maximum(square1 + square2 - inter_square, 1e-10)
+
+    return tf.clip_by_value(inter_square / union_square, 0.0, 1.0)

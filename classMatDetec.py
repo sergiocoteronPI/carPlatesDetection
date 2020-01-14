@@ -76,16 +76,20 @@ class claseParametrosDeteccionMatriculas:
                 self.setRutaParaImagenes()
 
     def setRutaParaImagenes(self):
-
+        
+        root = Tk()
         if tkinterOK:
-            self.rpi = tkinter.filedialog.askdirectory(initialdir = "./",title = "Elije un directorio")
+            self.rpi = tkinter.filedialog.askdirectory(initialdir = "./",title = "Imagenes")
             self.rpi +=  "/"
+        root.destroy()
 
     def setRutaParaEtiquetas(self):
 
+        root = Tk()
         if tkinterOK:
-            self.rpe = tkinter.filedialog.askdirectory(initialdir = "./",title = "Elije un directorio")
+            self.rpe = tkinter.filedialog.askdirectory(initialdir = "./",title = "Etiquetas")
             self.rpe +=  "/"
+        root.destroy()
 
 
 classMatDetec = claseParametrosDeteccionMatriculas(threshold = 0.5,

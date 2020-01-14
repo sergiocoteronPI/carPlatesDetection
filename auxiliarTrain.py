@@ -296,6 +296,7 @@ def retocar_imagen_y_coordenadas(imagen, bboxes):
 
     sha1, sha2, _ = imagen.shape
 
+    #Añadir ruido
     if np.random.randint(10)%2:
         sha_y,sha_x,_= imagen.shape
         noise = np.random.rand(sha_y,sha_x,3)
@@ -309,7 +310,7 @@ def retocar_imagen_y_coordenadas(imagen, bboxes):
     if np.random.randint(10)%2:
         imagen = cv2.blur(imagen,(3,3))
 
-    #flip
+    #Flip
     if np.random.randint(10)%2:
 
         imagen = cv2.flip(imagen, 1)
@@ -318,7 +319,7 @@ def retocar_imagen_y_coordenadas(imagen, bboxes):
             box[1] = sha2 - box[3]
             box[3] = aux
 
-    #crop
+    #Crop
     if np.random.randint(10)%2:
 
         box = bboxes[np.random.randint(len(bboxes))]
@@ -351,7 +352,7 @@ def retocar_imagen_y_coordenadas(imagen, bboxes):
         bboxes = newbboxes
         imagen = imagen[new_y:new_h, new_x:new_w, :]
 
-    #rotate
+    #Rotate
 
 
     return imagen, bboxes
@@ -363,6 +364,7 @@ def cargarLote(self, nom_lot):
 
     for name in nom_lot:
         
+        #Leemos el txt
         vector = []
         with open(name, 'r') as f:
             for line in f:
@@ -370,9 +372,10 @@ def cargarLote(self, nom_lot):
                 vector.append(linea)
 
         if vector == []:
+            print(name + " está vacío")
             return [], []
 
-        if len(vector[0]) == 1:
+        if len(vector[0]) == 1: #Si la imagen no contiene ni una matrícula entonces ->
             
             image = leer_imagen_en_eg_o_color(classMatDetec.rpi + vector[0][0])
             image, _ = retocar_imagen_y_coordenadas(image, [])
@@ -380,7 +383,7 @@ def cargarLote(self, nom_lot):
 
             im_de_out_batch, y_true_ = _batch(self, transformed_image ,[])
 
-        else:
+        else: 
 
             image = leer_imagen_en_eg_o_color(classMatDetec.rpi + vector[0][0])
             bboxes = []

@@ -11,21 +11,25 @@ from random import shuffle
 
 from classMatDetec import classMatDetec
 from neuralNetwork import neuralNetwork, lossFunction
-
 from auxiliarTrain import leerDatosTxt, cargarLote
 
 ### El usuario a lo mejor quiere cambiar donde se encuentras las imágenes y txt o algún otro parámetro del entrenamiento. ###
 classMatDetec.cambiarParametro()
 
+# Clase para almacenar los nombres de las etiquetas y poder pasarsela a el generador de lotes #
+# =========================================================================================== #
 class soloNombres:
     def __init__(self, imageLabelNomb):
         self.imageLabelNomb = imageLabelNomb
             
 imageLabelNomb = leerDatosTxt(ruta = classMatDetec.rpe)
 
-shuffle(imageLabelNomb)
+shuffle(imageLabelNomb) #Desordenamos la lista que contiene las etiquetas
 sn = soloNombres(imageLabelNomb)
+# =========================================================================================== #
 
+# Cargamos el modelo si existe si no se crea desde 0 #
+# ================================================== #
 if os.path.exists(classMatDetec.h5):
 
     #model = tf.keras.models.load_model(classMatDetec.h5, custom_objects={'loss_function': loss_function})
@@ -45,6 +49,9 @@ print('')
 print(model.summary())
 print('')
 
+# ================================================== #
+#  Clase que genera los lotes para el entrenamiento  #
+# ================================================== #
 class MY_Generator(tf.keras.utils.Sequence):
 
     def __init__(self, image_filenames, labels, batch_size):
@@ -81,6 +88,10 @@ class MY_Generator(tf.keras.utils.Sequence):
 my_training_batch_generator = MY_Generator(sn.imageLabelNomb, None, classMatDetec.batch_size)
 ##### =================================================================================== #####
 
+# ================================================== #
+
+# Este código fue necesario en su día ya que si no no me dejaba empezar a entrenar. Genera un lote de tamaño batchSize y entrena con el una época.
+
 def preparar_unlote(image_filenames, batch_size):
 
     batch_x = image_filenames[:batch_size]
@@ -105,6 +116,9 @@ def preparar_unlote(image_filenames, batch_size):
 x_train_lote, y_train_lote = preparar_unlote(sn.imageLabelNomb, classMatDetec.batch_size)
 model.fit(x_train_lote, y_train_lote, verbose=1)
 
+
+# Entrenamiento continuo del que se sale mediante ctrl+c (o si hay agún error claro) #
+# ================================================================================== #
 while True:
 
     try:
@@ -112,7 +126,7 @@ while True:
         model.fit_generator(generator=my_training_batch_generator,
                             #validation_data=validation_generator,
                             steps_per_epoch= int(len(sn.imageLabelNomb) / classMatDetec.batch_size),
-                            epochs=5,
+                            epochs=1,
                             verbose=1,
                             use_multiprocessing=True,
                             workers=3,
@@ -126,4 +140,21 @@ while True:
 
         shuffle(sn.imageLabelNomb)
 
-    except:break
+    except:
+        
+        print("")
+        print("")
+        guardar = input("Quieres guardar el modelo: ")
+        print("")
+        if guardar in ["s", "si", "y", "yes", "Y"]:
+
+            print('')
+            print(' ===== salvando modelo =====')
+            print('')
+            
+            tf.keras.models.save_model(model, classMatDetec.h5)
+            break
+        else:
+            break
+
+# ================================================================================== #
