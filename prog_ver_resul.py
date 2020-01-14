@@ -226,7 +226,7 @@ while salir not in ['out', 'salir', 'exit', 'irse', 'ir']:
 
     elif nhoa in ['c', 'wc', 'webcam']:
 
-        cap = cv2.VideoCapture(-1)
+        cap = cv2.VideoCapture(0)
 
         step = 0
         cont = 0
@@ -383,7 +383,10 @@ while salir not in ['out', 'salir', 'exit', 'irse', 'ir']:
 
                 frame = cv2.imread(image_label_nomb[i])
                 
-                orig_y, orig_x, _ = frame.shape
+                try:
+                    orig_y, orig_x, _ = frame.shape
+                except:
+                    continue
                 mult_y, mult_x = orig_y, orig_x
                 if orig_y < self.dim_fil:
                     mult_y = self.dim_fil
